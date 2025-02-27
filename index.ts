@@ -41,3 +41,47 @@ stringValue = 10 === 10;
 stringValue = [10, 20, 30];
 
 console.log("stringValue", stringValue);
+
+// new lecture
+
+const isPositiveNum: string = 5 > 0 ? "The number is positive" : "The number is negative"
+console.log("isPositiveNum", isPositiveNum);
+console.log(typeof isPositiveNum)
+
+const age = 30;
+const myName: string = "Pesho";
+
+const personDescription = 
+age < 40 
+? `${myName} is younger than 40. He is ${age} years old.`
+: `${myName} is older than 40. He is ${age} years old.`;
+
+const personName = `His name is "${myName}".`
+
+const test2: string = myName.length > 10 ? "Text is greater than 10" : "Text is lower than 10"
+
+console.log("personDescription", personName);
+
+// If Else Statement
+
+if (age < 40) {
+console.log("Age are lower than 40")
+} else {
+console.log("Age are greater than 40")
+}
+
+const num3: number = 10;
+if (num3 <= 10) {
+    console.log("The number is lower or equal to 10")
+} else if (num3 > 100) {
+    console.log("The number is greater than 100")
+} else {
+    console.log("The number is between 10 and 100")
+}
+
+
+// Type Allias
+type PersonInfoType = string | number
+
+const personNameInf: PersonInfoType = "Ivan";
+const personAgeInf: PersonInfoType = 25;
