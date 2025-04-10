@@ -1,65 +1,70 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
+import path from "path";
 
-test("Has logo exist", async ({ page }) => {
-  const url = process.env.BASE_URL as string;
-  await page.goto(url);
+interface Results {
+  username: string;
+  password: string;
+  dropdownValue: string;
+}
 
-  // Get image by alt text
-  const logo = page.getByAltText("Playwright logo").first();
-  await expect(logo).toBeVisible();
-});
+const results = {
+  username: "testuser",
+  password: "password",
+  dropdownValue: "dd3",
+};
 
-test("Has heading exist", async ({ page }) => {
-  const url = process.env.BASE_URL as string;
-  await page.goto(url);
+const fillFormFields = async (page: Page) => {
+  const usernameInput = page.locator("xpath=//input[@name='username']");
+  await expect(usernameInput).toBeVisible();
+  await usernameInput.fill("testUser");
+  await expect(usernameInput).toHaveValue("testUser");
 
-  // Locte Heading 1 by locator tag name
-  const headingTitle = page.locator("h1");
+  const checkboxEl = page.locator('xpath=//input[@value="cb2"]');
+  await expect(checkboxEl).toBeVisible();
+  await checkboxEl.check();
+  await expect(checkboxEl).toBeChecked();
 
-  // log in the test results locate element value
-  console.log((await headingTitle.innerText()).valueOf());
+  const dropdown = page.locator('xpath=//select[@name="dropdown"]');
+  await expect(dropdown).toBeVisible();
+  await dropdown.selectOption("dd2");
+  await expect(dropdown).toHaveValue("dd2");
 
-  await expect(headingTitle).toBeVisible();
-});
+  const fileInput = page.locator('xpath=//input[@type="file"]');
+  const filePath = path.resolve(__dirname, "./tests.txt");
+  await fileInput.setInputFiles(filePath);
+};
 
-test("Have navigation links exist", async ({ page }) => {
-  const url = process.env.BASE_URL as string;
-  await page.goto(url);
+test.describe("Testing Web Form", () => {
+  test.beforeEach("Open Form Web Page", async ({ page }) => {
+    await page.goto(
+      "https://testpages.herokuapp.com/styled/basic-html-form-test.html"
+    );
+  });
 
-  // Locate navigation link Docs by role and text
-  const docsLink = page.getByRole("link", { name: "Docs" });
-  const apiLink = page.getByRole("link", { name: "API" });
-  await expect(docsLink).toBeVisible();
-  await expect(apiLink).toBeVisible();
-});
+  test("Cancel and reset the form", async ({ page }) => {
+    await fillFormFields(page);
+    const cancelBtn = page.locator('xpath=//input[@type="reset"]');
+    await cancelBtn.click();
 
-test("Click Community navigation link and check the path", async ({ page }) => {
-  const url = process.env.BASE_URL as string;
-  await page.goto(url);
+    await expect(page.locator("xpath=//input[@name='username']")).toHaveValue(
+      ""
+    );
+  });
 
-  // Locate navigation link by role and text
-  const communityLink = page.getByRole("link", { name: "Community" });
-  await expect(communityLink).toBeVisible();
+  test("Submit and proceed to form details", async ({ page }) => {
+    await fillFormFields(page);
+    const submitBtn = page.locator('xpath=//input[@type="submit"]');
+    await submitBtn.click();
 
-  //Click the located element
-  await communityLink.click();
+    await expect(page).toHaveURL(
+      "https://testpages.herokuapp.com/styled/the_form_processor.php"
+    );
+    const title = page.locator("xpath=//h1");
+    await expect(title).toHaveText("Processed Form Details");
 
-// Expect the current page to have passed URL
-  await expect(page).toHaveURL("https://playwright.dev/community/welcome")
-
-  const headingTwo = page.getByRole("heading", {name: "Ambassadors"})
-  await expect(headingTwo).toBeVisible();
-});
-
-// logosist_zAAF
-test("Check if the ul exist", async ({ page }) => {
-  const url = process.env.BASE_URL as string;
-  await page.goto(url);
-
-// Locate logos list by locator clss name syntax
-const logosListItems = page.locator("ul.logosList_zAAF li")
-
-// Expect the count of the list items
-await expect(logosListItems).toHaveCount(9);
-
+    const usernameVal = page.locator('xpath=//li[@id="_valueusername"]');
+    await expect(usernameVal).toHaveText("testUser");
+    const dropdownValue = page.locator('xpath=//li[@id="_valuedropdown"]');
+    await expect(dropdownValue).toHaveText("dd2");
+  });
 });
